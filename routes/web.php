@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RestTestController;
-
+use App\Http\Controllers\DiggingDeeperController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,4 +48,10 @@ Route::group($groupData, function () {
         ->except(['show'])                               //не робити маршрут для метода show
         ->names('blog.admin.posts');
 
+});
+
+
+Route::group(['prefix' => 'digging_deeper'], function () {
+    Route::get('collections', [DiggingDeeperController::class, 'collections'])
+        ->name('digging_deeper.collections');
 });

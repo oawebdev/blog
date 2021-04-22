@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Blog\Admin;
 use App\Repositories\BlogPostRepository;
 use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
+use App\Jobs\BlogPostAfterCreateJob;
+use App\Jobs\BlogPostAfterDeleteJob;
+use App\Models\BlogPost;
+use App\Http\Requests\BlogPostCreateRequest;
 
 class PostController extends BaseController
 {
@@ -46,7 +48,10 @@ class PostController extends BaseController
      */
     public function create()
     {
-        //
+        $item = new BlogPost();
+        $categoryList = $this->blogCategoryRepository->getForComboBox();
+
+        return view('blog.admin.posts.edit', compact('item', 'categoryList'));
     }
 
     /**
@@ -55,9 +60,22 @@ class PostController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BlogPostCreateRequest $request)
     {
-        //
+        $data = $request->input(); //отримаємо масив даних, які надійшли з форми
+
+        $item = (new BlogPost())->create($data); //створюємо об'єкт і додаємо в БД
+
+        if ($item) {
+            return redirect()
+                ->route('blog.admin.posts.edit', [$item->id])
+                ->with(['success' => 'Успішно збережено']);
+        } else {
+            return back()
+                ->withErrors(['msg' => 'Помилка збереження'])
+                ->withInput();
+        }
+
     }
 
     /**
@@ -97,7 +115,7 @@ class PostController extends BaseController
      */
     public function update(BlogPostUpdateRequest $request, $id)
     {
-        $id = 1000;
+        //$id = 1000;
         $item = $this->blogPostRepository->getEdit($id);
         //dd($item);
         if (empty($item)) { //якщо ід не знайдено
@@ -107,14 +125,9 @@ class PostController extends BaseController
         }
 
         $data = $request->all(); //отримаємо масив даних, які надійшли з форми
+        //dd($data);
+        //dd(__METHOD__, $item, $data);
 
-        dd(__METHOD__, $data);
-        if (empty($data['slug'])) { //якщо псевдонім порожній
-            $data['slug'] = Str::slug($data['title']); //генеруємо псевдонім
-        }
-        if (empty($item->published_at) && $data['is_published']) { //якщо поле published_at порожнє і нам прийшло 1 в ключі is_published, то
-            $data['published_at'] = Carbon::now(); //генеруємо поточну дату
-        }
         $result = $item->update($data); //оновлюємо дані об'єкта і зберігаємо в БД
 
         if ($result) {
@@ -136,6 +149,17 @@ class PostController extends BaseController
      */
     public function destroy($id)
     {
-        //
+        $result = BlogPost::destroy($id); //софт деліт, запис лишається
+
+       // $result = BlogPost::find($id)->forceDelete(); //повне видалення з БД
+
+        if ($result) {
+            return redirect()
+                ->route('blog.admin.posts.index')
+                ->with(['success' => "Запис id[$id] видалено"]);
+        } else {
+            return back()
+                ->withErrors(['msg' => 'Помилка видалення']);
+        }
     }
 }

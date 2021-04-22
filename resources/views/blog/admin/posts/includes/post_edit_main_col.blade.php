@@ -21,8 +21,8 @@
                     </li>
                 </ul>
                 <br>
-                <div class="tab-content1">
-                    <div class="tab-pane2 active" id="maindata" role="tabpanel">
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="maindata" role="tabpanel">
                         <div class="form-group">
                             <label for="title">Заголовок</label>
                             <input type="text" name="title" value="{{ $item->title }}" id="title" class="form-control" minlength="3" required>
@@ -30,10 +30,10 @@
 
                         <div class="form-group">
                             <label for="content_raw">Текст статті</label>
-                            <textarea name="content_raw" id="content_raw" rows="20" class="form-control">{{ old('cotent_raw', $item->content_raw) }}</textarea>
+                            <textarea name="content_raw" id="content_raw" rows="20" class="form-control">{{ old('content_raw', $item->content_raw) }}</textarea>
                         </div>
                     </div>
-                    <div class="tab-pane2" id="adddata" role="tabpanel">
+                    <div class="tab-pane fade" id="adddata" role="tabpanel">
                         <div class="form-group">
                             <label for="category_id">Категорія</label>
                             <select name="category_id" placeholder="Оберіть категорію" id="category_id" class="form-control" required>
